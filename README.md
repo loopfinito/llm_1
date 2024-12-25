@@ -1,6 +1,6 @@
 # LLM #1
 
-Experiments on LLM based on Sebastian Raschka's book « Build a large Language Model »
+Experiments on LLM based on Sebastian Raschka's book « Build a Large Language Model »
 
 ## Usage
 
