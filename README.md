@@ -4,5 +4,5 @@ Experiments on LLM based on Sebastian Raschka's book « Build a Large Language 
 
 ## Usage
 
-    pip install tiktoken
+    pip install tiktoken torch
     python3 main.py
