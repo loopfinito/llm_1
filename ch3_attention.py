@@ -108,22 +108,22 @@ class MultiHeadAttentionWrapper(nn.Module):
     def forward(self, x):
         return torch.cat([head(x) for head in self.heads], dim=-1)
 
-class MultiHeadAttenion(nn.Module):
+class MultiHeadAttention(nn.Module):
     def __init__(self, d_in, d_out, context_length,
                 dropout, num_heads, qkv_bias=False):
         super().__init__()
         self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
-        self.d_out = d_out // num_heads
+        self.d_out = d_out 
         self.num_heads = num_heads
-        self.head_dim = d_out
+        self.head_dim = d_out // num_heads
         self.out_proj = nn.Linear(d_out, d_out)
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
         self.register_buffer(
             "mask",
             torch.triu(torch.ones(context_length, context_length), 
-            diagonal=-1)
+            diagonal=1)
         )
 
     def forward(self, x):
@@ -137,7 +137,7 @@ class MultiHeadAttenion(nn.Module):
         values = values.view(b, num_tokens, self.num_heads, self.head_dim)
         queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)
         
-        # num_heads beforce num_tokens
+        # num_heads before num_tokens
         keys = keys.transpose(1,2)
         queries = queries.transpose(1,2)
         values = values.transpose(1,2)
@@ -146,7 +146,7 @@ class MultiHeadAttenion(nn.Module):
         mask_bool = self.mask.bool()[:num_tokens, :num_tokens]
         attn_scores.masked_fill_(mask_bool, -torch.inf)
         attn_weights = torch.softmax(
-            attn_scores / keys.shape(-1)**0.5, dim=-1)
+            attn_scores / keys.shape[-1]**0.5, dim=-1)
         attn_weights = self.dropout(attn_weights)
 
         context_vec = (attn_weights @ values).transpose(1,2)
@@ -211,7 +211,7 @@ batch = torch.stack((inputs, inputs), dim=0)
 #print("context_vecs.shape :", context_vecs.shape)
 
 # Multi-head
-torch.manual_seed = 789
+torch.manual_seed(789)
 context_length = batch.shape[1]
 d_in, d_out = 3, 2
 mha = MultiHeadAttentionWrapper(
@@ -230,3 +230,12 @@ mha = MultiHeadAttentionWrapper(
 context_vecs = mha(batch)
 print("context_vecs 3.2 : \n", context_vecs)
 print("context_vecs.shape 3.2 : \n", context_vecs.shape)
+
+# use MultiHeadAttentionClass
+torch.manual_seed(123)
+batch_size, context_length, d_in = batch.shape
+d_out = 2
+mha = MultiHeadAttention(d_in, d_out, context_length, 0.0, num_heads=2)
+context_vecs = mha(batch)
+print("MultiheadAttentioClass\n", context_vecs)
+print("MultiheadAttentioClass context_vecs.shape", context_vecs.shape)
