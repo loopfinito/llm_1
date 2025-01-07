@@ -239,3 +239,15 @@ mha = MultiHeadAttention(d_in, d_out, context_length, 0.0, num_heads=2)
 context_vecs = mha(batch)
 print("MultiheadAttentioClass\n", context_vecs)
 print("MultiheadAttentioClass context_vecs.shape", context_vecs.shape)
+
+# Exercise 3.3
+# 12 attention heads, input and output embeddings size : 768
+
+inputs = torch.rand((6, 768))
+batch = torch.stack((inputs, inputs), dim=0)
+batch_size, context_length, d_in = batch.shape
+d_out = 768
+mha = MultiHeadAttention(d_in, d_out, context_length, 0.0, num_heads=12)
+context_vecs = mha(batch)
+
+print("MultiheadAttentioClass ex 3.3 context_vecs.shape", context_vecs.shape)
